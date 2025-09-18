@@ -2,26 +2,26 @@
 
 import numpy as np
 
-# Ameya's:
+# Ameya's
 def ccf(X1, X2=None, lag=0):
-    if X2 is None:
-        X2 = X1
-    if X1.shape != X2.shape:
-        raise ValueError("Two array shapes not equal.")
-    
-    shape = X1.shape
-    axis_to_avg = len(shape)-1
-    
-    padding = np.zeros(shape=tuple(
-        (shape[i] if i < axis_to_avg else np.abs(lag))
-            for i in range(len(shape))))
-    
-    if lag >= 0:
-        prod = X1[lag:] * np.conjugate(X2[:(None if lag == 0 else -lag)])
-    else:
-        prod = X1[:lag] * np.conjugate(X2[-lag:])
-        
-    return np.mean(np.concatenate([prod, padding], axis=axis_to_avg), axis=axis_to_avg)
+	if X2 is None:
+		X2 = X1 # acf
+	if X1.shape != X2.shape:
+		raise ValueError("Two array shapes not equal.")
+
+	shape = X1.shape
+	axis_to_avg = len(shape)-1
+
+	padding = np.zeros(shape=tuple(
+		(shape[i] if i < axis_to_avg else np.abs(lag))
+		for i in range(len(shape))))
+
+	if lag >= 0:
+		prod = X1[lag:] * np.conjugate(X2[:(None if lag == 0 else -lag)])
+	else:
+		 prod = X1[:lag] * np.conjugate(X2[-lag:])
+
+	return np.mean(np.concatenate([prod, padding], axis=axis_to_avg), axis=axis_to_avg)
 
 """def ccf(x1, x2, l):
 	summ = 0 + 0j
@@ -38,9 +38,18 @@ def acf(x, l):
 def get_moments(X_ho, X_vo, N_h, N_v, R, va, C, Cd, Cp):
 	# X_h and X_v have dims (range, ray, pulse)
 
-	C = C[0][0]
-	Cd = Cd[0]
-	Cp = Cp[0]
+	# C = C[0][0]
+	# Cd = Cd[0]
+	# Cp = Cp[0]
+
+	if not np.isfinite(N_h) or N_h < 0:
+		N_h = 0
+	if not np.isfinite(N_v) or N_v < 0:
+		N_v = 0
+
+	C = np.nanmean(C[:,0])
+	Cd = np.nanmean(Cd)
+	Cp = np.nanmean(Cp)
 
 	moments = {'DBZ': None, 'VEL': None, 'WIDTH': None, 'ZDR': None, 'RHOHV': None, 'PHIDP': None, 'SNRH': None, 'SNRV': None}
 
@@ -64,7 +73,7 @@ def get_moments(X_ho, X_vo, N_h, N_v, R, va, C, Cd, Cp):
 			WIDTHOUT[it,ir] = (np.sqrt(2)*va/np.pi)*np.sqrt(np.abs(np.log(S_h/np.abs(acf(X_h,1)))))
 			ZDROUT[it,ir] = 10*np.log10(S_h/S_v) # + 10*np.log10(Cd)
 			RHOHVOUT[it,ir] = np.abs(ccf(X_h, X_v, 0))/np.sqrt(S_h*S_v)
-			PHIDPOUT[it,ir] = np.rad2deg(np.angle(ccf(X_h, X_v, 0)) + Cp) # np.atan2(np.imag(S_h),np.real(S_h))-np.atan2(np.imag(S_v),np.real(S_v)) + Cp
+			PHIDPOUT[it,ir] = np.rad2deg(np.angle(ccf(X_h, X_v, 0))) + Cp # np.atan2(np.imag(S_h),np.real(S_h))-np.atan2(np.imag(S_v),np.real(S_v)) + Cp
 			SNRHOUT[it,ir] = S_h/N_h
 			SNRVOUT[it,ir] = S_v/N_v
 
