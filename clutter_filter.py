@@ -233,6 +233,28 @@ class GroundClutterFilter:
                     break
         return interpolated_spectrum_batch
 
+    # def _get_interpolation_width_L(self, poly_order):
+    #     """
+    #     Determines the interpolation half-width L based on polynomial order.
+    #     This is a simplified lookup based on Table B1.
+    #     In a real application, this would be derived from the filter's
+    #     frequency response.
+
+    #     Args:
+    #         poly_order (int): The polynomial order used for filtering.
+
+    #     Returns:
+    #         int: The half-width L for interpolation.
+    #     """
+    #     if poly_order <= 3: return 1
+    #     elif poly_order <= 5: return 2
+    #     elif poly_order <= 8: return 3
+    #     elif poly_order <= 10: return 4
+    #     elif poly_order <= 13: return 5
+    #     elif poly_order <= 16: return 6
+    #     elif poly_order <= 19: return 7
+    #     else: return 8
+
     def _get_interpolation_width_L(self, poly_order):
         """
         Determines the interpolation half-width L based on polynomial order.
@@ -253,7 +275,9 @@ class GroundClutterFilter:
         elif poly_order <= 13: return 5
         elif poly_order <= 16: return 6
         elif poly_order <= 19: return 7
-        else: return 8
+        elif poly_order <= 22: return 8
+        elif poly_order <= 25: return 9
+        else: return 10
 
     def filter_iq_data(self, i_data, q_data, cnr_db_map=None, apply_interpolation=True,
                              interpolation_E_points=3, velocity_threshold_interp=0.2):
