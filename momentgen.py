@@ -71,11 +71,15 @@ def get_moments(X_ho, X_vo, N_h, N_v, R, va, C, Cd, Cp):
 			lag1h = acf(X_h,1)
 			# print(P_h, N_h, P_v, N_v)
 
-			DBZOUT[it,ir] = 10*np.log10(S_h) + 20*np.log10(r if not r==0 else 1e-10) + 10*np.log10(C if not C==0 else 1e-10)
+			r_safe = r if r != 0 else 1e-10
+			C_safe = C if C != 0 else 1e-10
+			DBZOUT[it,ir] = 10*np.log10(S_h) + 20*np.log10(r_safe) + 10*np.log10(C_safe)
 			VELOUT[it,ir] = (va/np.pi)*np.angle(lag1h)
 			WIDTHOUT[it,ir] = (np.sqrt(2)*va/np.pi)*np.sqrt(np.abs(np.log(S_h/np.abs(lag1h))))
 			ZDROUT[it,ir] = 10*np.log10(S_h/S_v) # + 10*np.log10(Cd)
-			RHOHVOUT[it,ir] = np.abs(cross)/np.sqrt(S_h*S_v)
+			# Use total power P_h*P_v in RHOHV denominator: always bounded [0,1] by
+			# Cauchy-Schwarz, no NaN or blow-up for noise-dominated gates.
+			RHOHVOUT[it,ir] = np.abs(cross)/np.sqrt(P_h*P_v) if P_h > 0 and P_v > 0 else np.nan
 			PHIDPOUT[it,ir] = np.rad2deg(np.angle(cross)) + Cp # np.atan2(np.imag(S_h),np.real(S_h))-np.atan2(np.imag(S_v),np.real(S_v)) + Cp
 			SNRHOUT[it,ir] = 10*np.log10(S_h/N_h)
 			SNRVOUT[it,ir] = 10*np.log10(S_v/N_v)
